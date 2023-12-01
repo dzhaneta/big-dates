@@ -20,7 +20,7 @@ const PeriodWheel = styled.div`
     transition-property: background, text-align, font-size, font-weight, line-height;
     transition-duration: 1s;
     transition-timing-function: linear;
-    transition-delay: 2s;
+    transition-delay: 0;
 
     &:hover {
       width: 56px;
@@ -70,7 +70,6 @@ const PeriodWheel = styled.div`
 `;
 
 const PeriodCirleSwicth: FC<{ periods: Period[]; }> = ({periods}) => {
-  console.log('wheel gets periods', periods);
 
   const [itemsEls, setItemsEls] = useState<HTMLElement[]>([]);
   const svgRef = useRef<SVGSVGElement>(null);
@@ -117,7 +116,7 @@ const PeriodCirleSwicth: FC<{ periods: Period[]; }> = ({periods}) => {
       });
     }
     
-    tl = gsap.timeline({ paused:true, reversed: true });
+    tl = gsap.timeline({ paused: true, reversed: true });
 
     tl.to('.wrapper', {
       rotation: 360, 
@@ -155,6 +154,7 @@ const PeriodCirleSwicth: FC<{ periods: Period[]; }> = ({periods}) => {
     // set active item to the item that was clicked and remove active class from all items
     const newItems: HTMLElement[] = [...itemsEls];
     newItems[current].classList.remove('active');
+    console.log('new active item', newItems);
     newItems[activeItem].classList.add('active');
     setItemsEls(newItems);
 
@@ -174,6 +174,7 @@ const PeriodCirleSwicth: FC<{ periods: Period[]; }> = ({periods}) => {
   };
 
   const moveWheel = (amount: number) => {
+    console.log('moveWheel', tl);
     const progress = tl.progress();
     tl.progress(wrapProgress(snap(tl.progress() + amount)));
     const next = tracker.item;
@@ -199,7 +200,7 @@ const PeriodCirleSwicth: FC<{ periods: Period[]; }> = ({periods}) => {
           <div
             key={period.id}
             className={`item ${period.id} ${period.id ===1? 'active' : ''}`}
-            onClick={() => handleClick(period.id)}
+            onClick={() => handleClick(periods.indexOf(period))}
           >
             {period.id}
             <span className='item__name'>{period.name}</span>
