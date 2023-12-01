@@ -1,12 +1,18 @@
 import React from "react";
-import { createRoot } from "react-dom/client";
+import ReactDOM from 'react-dom/client';
+import { ThemeProvider } from 'styled-components';
+import { baseTheme } from './styles/theme';
+import FontStyles from './styles/fontStyles';
+import GlobalStyles from "./styles/globalStyles";
 import App from "./App";
 
-const rootEl = document.querySelector("#root");
-if (!rootEl) throw new Error("Cannot find root element with that id");
-const root = createRoot(rootEl);
+const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
 root.render(
   <React.StrictMode>
-    <App />
+    <ThemeProvider theme={baseTheme}>
+      <FontStyles />
+      <GlobalStyles />
+      <App />
+    </ThemeProvider>
   </React.StrictMode>
 );

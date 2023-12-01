@@ -41,13 +41,28 @@ module.exports = [
         },
         {
           test: /\.css$/,
-          exclude: /node_modules/,
           use: ["style-loader", "css-loader"],
         },
         {
-          test: /\.(png|svg)$/i,
+          test: /\.(png)$/i,
           type: "asset/resource",
         },
+        {
+          test: /\.(svg)$/i,
+          type: "asset/inline",
+        },
+        {
+          test: /\.(woff(2)?|ttf|eot)(\?v=\d+\.\d+\.\d+)?$/,
+          use: [
+            {
+              loader: 'file-loader',
+              options: {
+                name: '[name].[ext]',
+                outputPath: 'fonts/'
+              }
+            }
+          ]
+        }
       ],
     },
   },

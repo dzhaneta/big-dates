@@ -1,5 +1,5 @@
 {
-  "name": "react-from-scratch",
+  "name": "historical-dates",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -9,11 +9,14 @@
     "dev": "npm-run-all -s build start"
   },
   "keywords": [],
-  "author": "",
+  "author": "Dzhaneta Kabertay",
   "license": "ISC",
   "dependencies": {
+    "gsap": "^3.12.2",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "styled-components": "^6.1.1",
+    "swiper": "^11.0.4"
   },
   "devDependencies": {
     "@babel/cli": "^7.21.0",
@@ -21,10 +24,12 @@
     "@babel/preset-env": "^7.20.2",
     "@babel/preset-react": "^7.18.6",
     "@babel/preset-typescript": "^7.21.0",
+    "@svgr/webpack": "^8.1.0",
     "@types/react": "^18.0.28",
     "@types/react-dom": "^18.0.11",
     "babel-loader": "^9.1.2",
     "css-loader": "^6.7.3",
+    "file-loader": "^6.2.0",
     "html-webpack-plugin": "^5.5.0",
     "npm-run-all": "^4.1.5",
     "style-loader": "^3.3.1",

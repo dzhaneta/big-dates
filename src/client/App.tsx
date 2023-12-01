@@ -1,12 +1,11 @@
-import React from "react";
-import "./assets/styles/style.css";
-import Typography from "./components/Typography";
+import {FC} from 'react';
 
-const App = () => {
+// blocks
+import Dates from './components/Dates/Dates';
+
+const App: FC = () => {
   return (
-    <>
-      <Typography>Rendered H2</Typography>
-    </>
+    <Dates />
   );
 };
 
