@@ -1,7 +1,7 @@
 import {FC, useRef, useState, useLayoutEffect} from 'react';
 import styled from 'styled-components';
 import { gsap } from 'gsap';
-import { MotionPathPlugin } from "gsap/MotionPathPlugin";
+import { MotionPathPlugin } from 'gsap/MotionPathPlugin';
 import { Period } from '../../types/Period';
 import dot from '../../assets/icons/icon-dot.svg'
 
@@ -88,22 +88,20 @@ type PeriodCirleSwicthProps = {
 
 const PeriodCirleSwicth: FC<PeriodCirleSwicthProps> = ({ periods, activeIndex, onSwitchPeriod }) => {
 
+  gsap.registerPlugin(MotionPathPlugin);
+
   const [itemsEls, setItemsEls] = useState<HTMLElement[]>([]);
   const svgRef = useRef<SVGSVGElement>(null);
-  
-  gsap.registerPlugin(MotionPathPlugin);
+  const wrapperRef = useRef<HTMLDivElement>(null);
 
   const trackerRef = useRef<{ item: number }>({ item: 0 });
   const snapRef = useRef<(value: number) => number>();
   const wrapProgressRef = useRef<(value: number) => number>();
+  const numItemsRef = useRef<number | null>(null);
+  const itemStepRef = useRef<number | null>(null);
+  const tl = useRef<gsap.core.Timeline>(gsap.timeline({ paused: true, reversed: true }));
 
-  let numItems: number;
-  let itemStep: number;
-  let tl: gsap.core.Timeline;
   let wrapTracker: (value: number) => number;
-
-  tl = gsap.timeline({ paused: true, reversed: true });
-
 
   useLayoutEffect(() => {
 
@@ -115,11 +113,11 @@ const PeriodCirleSwicth: FC<PeriodCirleSwicthProps> = ({ periods, activeIndex, o
     setItemsEls(items);
     console.log('items set', items);
 
-    numItems = items.length;
-    itemStep = 1 / numItems;
+    numItemsRef.current = items.length;
+    itemStepRef.current = 1 / numItemsRef.current;
     wrapProgressRef.current = gsap.utils.wrap(0, 1);
-    snapRef.current = gsap.utils.snap(itemStep);
-    wrapTracker = gsap.utils.wrap(0, numItems);
+    snapRef.current = gsap.utils.snap(itemStepRef.current);
+    wrapTracker = gsap.utils.wrap(0, numItemsRef.current);
     
     if (items.length > 0) {
       items.forEach((item, i) => {
@@ -135,33 +133,33 @@ const PeriodCirleSwicth: FC<PeriodCirleSwicthProps> = ({ periods, activeIndex, o
       });
     }
     
-    tl.to('.wrapper', {
+    tl.current.to(wrapperRef.current, {
       rotation: 360, 
-      transformOrigin: 'center', 
       duration: 1, 
       ease: 'none'
     });
 
-    tl.to(items, {
+    tl.current.to(items, {
       rotation: "-=360", 
       transformOrigin: 'center center', 
       duration: 1, 
       ease: 'none',
     }, 0);
 
-    tl.to(trackerRef, {
-      item: numItems,
+    tl.current.to(trackerRef, {
+      item: numItemsRef.current,
       duration: 1, 
       ease: 'none',
       modifiers: {
-        item: value => wrapTracker(numItems - Math.round(value))
+        item: value => {
+          console.log('error here?');
+          return (numItemsRef.current !== null) && wrapTracker(numItemsRef.current - Math.round(value));
+        }
       }
     }, 0);
   }, [periods]);
 
   const handleClick = (i: number) => {
-    console.log('handleClick');
-    console.log('tracker', trackerRef.current.item);
     const current = trackerRef.current.item;
     const activeItem = i;
 
@@ -171,26 +169,26 @@ const PeriodCirleSwicth: FC<PeriodCirleSwicthProps> = ({ periods, activeIndex, o
 
     // set active item to the item that was clicked and remove active class from all items
     const newItems: HTMLElement[] = [...itemsEls];
-    console.log('prev index', current);
-    console.log('new index', i);
 
     newItems[current].classList.remove('active');
     newItems[activeItem].classList.add('active');
     setItemsEls(newItems);
     trackerRef.current.item = activeItem;
-    console.log('new tracker', trackerRef.current.item);
 
     const diff = current - i;
+    console.log('itemStep', itemStepRef.current);
 
-    if (Math.abs(diff) < numItems / 2) {
-      moveWheel(diff * itemStep);
-    } else {
-      const amt = numItems - Math.abs(diff);
-
-      if (current > i) {
-        moveWheel(amt * -itemStep);
+    if (numItemsRef.current !== null && itemStepRef.current !== null) {
+      if (Math.abs(diff) < numItemsRef.current / 2) {
+        moveWheel(diff * itemStepRef.current);
       } else {
-        moveWheel(amt * itemStep);
+        const amt = numItemsRef.current - Math.abs(diff);
+
+        if (current > i) {
+          moveWheel(amt * -itemStepRef.current);
+        } else {
+          moveWheel(amt * itemStepRef.current);
+        }
       }
     }
 
@@ -198,18 +196,20 @@ const PeriodCirleSwicth: FC<PeriodCirleSwicthProps> = ({ periods, activeIndex, o
   };
 
   const moveWheel = (amount: number) => {
-    const progress = tl.progress();
+    console.log('tl progress', tl.current.progress());
+
+    const progress = tl.current.progress();
     const snapFn = snapRef.current;
     const wrapProgressFn = wrapProgressRef.current;
 
     if (snapFn && wrapProgressFn) {
-      tl.progress(wrapProgressFn(snapFn(tl.progress() + amount)));
-      tl.progress(progress);
+      tl.current.progress(wrapProgressFn(snapFn(tl.current.progress() + amount)));
+      tl.current.progress(progress);
 
       gsap.to(tl, {
-        progress: snapFn(tl.progress() + amount),
+        progress: snapFn(tl.current.progress() + amount),
         modifiers: {
-          progress: wrapProgressFn
+          progress: gsap.utils.wrap(0, 1)
         }
       });
     }
@@ -217,7 +217,7 @@ const PeriodCirleSwicth: FC<PeriodCirleSwicthProps> = ({ periods, activeIndex, o
 
   return(
     <PeriodWheel className="container">
-      <div className="wrapper">
+      <div className="wrapper" ref={wrapperRef}>
         {(periods.length > 0) && periods.map(period => (
           <div
             key={period.id}
