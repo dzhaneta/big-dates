@@ -6,7 +6,7 @@ import { Period } from '../../types/Period';
 import dot from '../../assets/icons/icon-dot.svg'
 
 const PeriodWheel = styled.div`
-  max-width: 500px;
+  width: clamp(350px, 19.732rem + 14.88vw, 530px);
 
   .item {
     position: relative;
@@ -62,15 +62,23 @@ const PeriodWheel = styled.div`
   }
 
   svg {
-      height: 530px;
-      aspect-ratio: 1;
-      opacity: 0.2;
-      overflow: visible;
-      z-index: -1;
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%,-50%);
+    width: 350px;
+    aspect-ratio: 1;
+    opacity: 0.2;
+    overflow: visible;
+    z-index: -1;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+    
+    @media ${props => props.theme.media.desktop} {
+      width: 410px;
+    }
+
+    @media ${props => props.theme.media.largeScreens} {
+      width: 530px;
+    }
   }
 
   .st0 { fill: none;
@@ -111,7 +119,6 @@ const PeriodCirleSwicth: FC<PeriodCirleSwicthProps> = ({ periods, activeIndex, o
 
     const items = gsap.utils.toArray('.item') as HTMLElement[];
     setItemsEls(items);
-    console.log('items set', items);
 
     numItemsRef.current = items.length;
     itemStepRef.current = 1 / numItemsRef.current;
@@ -126,7 +133,7 @@ const PeriodCirleSwicth: FC<PeriodCirleSwicthProps> = ({ periods, activeIndex, o
             path: circlePath,
             align: circlePath,
             alignOrigin: [0.5, 0.5],
-            end: i / items.length,
+            end: gsap.utils.wrap(0, 1, i / items.length - 0.15),
           },
           scale: 0.9,
         });

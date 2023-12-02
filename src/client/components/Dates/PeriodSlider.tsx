@@ -173,7 +173,6 @@ const PeriodSlider: FC<PeriodSliderProps> = ({ periods, activeIndex, onChangePer
   };
 
   function handleSwitchPeriod (newIndex: number) {
-    console.log('periodSlider from Switcher new index', newIndex);
     swiperRef.current.swiper.slideTo(newIndex, 10);
   }
   

@@ -81,7 +81,7 @@ const Dates: FC = () => {
   // HANDLERS
 
   function changePeriod (newPeriod: number) {
-    console.log('new period', newPeriod);    
+
     setActivePeriod(newPeriod);
   }
   
