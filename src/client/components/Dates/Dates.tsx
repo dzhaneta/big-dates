@@ -90,7 +90,7 @@ const Dates: FC = () => {
       <DatesContent>
         <DatesTitle />
 
-        <PeriodSlider periods={periods} onChangePeriod={changePeriod}/>
+        <PeriodSlider periods={periods} activeIndex={activePeriod - 1} onChangePeriod={changePeriod}/>
 
         <EventSlider events={events}/>
       </DatesContent>

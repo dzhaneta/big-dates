@@ -1,9 +1,10 @@
-import {FC, useEffect, useState} from 'react';
+import {FC, useRef, useState,useEffect, useLayoutEffect } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
 import 'swiper/css/pagination';
 import styled from 'styled-components';
 import { Pagination, Navigation } from 'swiper/modules';
+import { gsap } from 'gsap';
 import EventItem from './EventItem';
 import { Date } from '../../types/Period';
 import arrowNextBlue from '../../assets/icons/icon-arrow-next-blue.svg';
@@ -33,7 +34,6 @@ const StyledSwiper = styled(Swiper)`
       height: 135px;
       padding-bottom: 0;
       position: relative;
-      
     }
   }
 
@@ -116,6 +116,18 @@ const EventSlider: FC<{ events: Date[]; }> = ({ events }) => {
 
   const [swiper, setSwiper] = useState<any>(null);
   const slideTo = (index: number) => swiper && swiper.slideTo(index);
+  const container = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    gsap.fromTo(container.current, 
+      { opacity: 0 },
+      {
+        duration: 1,
+        ease: 'power1.inOut',
+        opacity: 1,
+      }
+    )
+  }, [events]);
 
   // setting first slide after period change
   useEffect(() => {
@@ -148,6 +160,7 @@ const EventSlider: FC<{ events: Date[]; }> = ({ events }) => {
           spaceBetween: 80,
       },
       }}
+      ref={container}
     >
       <EventsNavButton className='events-button events-button-prev'></EventsNavButton>
       {events.map(item => (

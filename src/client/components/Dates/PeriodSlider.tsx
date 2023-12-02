@@ -45,6 +45,7 @@ const StyledSwiper = styled(Swiper)`
 
 const NavPanel = styled.div`
   position: absolute;
+  z-index: 4;
   bottom: 13.33px;
   display: flex;
   flex-direction: column;
@@ -72,6 +73,10 @@ const NavButtons = styled.div`
     aspect-ratio: 1;
     border: none;
     background-color: transparent;
+
+    &:hover {
+      cursor: pointer;
+    }
 
     &:disabled {
       opacity: 0.5;
@@ -130,11 +135,11 @@ const Cirle = styled.div`
 
 type PeriodSliderProps = {
   periods: Period[];
+  activeIndex: number;
   onChangePeriod: (newPeriod: number) => void;
 };
 
-const PeriodSlider: FC<PeriodSliderProps> = ({ periods, onChangePeriod }) => {
-  console.log('period slider gets periods', periods);
+const PeriodSlider: FC<PeriodSliderProps> = ({ periods, activeIndex, onChangePeriod }) => {
   const swiperRef = useRef<any>(null);
 
   function handleChangePeriod() {
@@ -143,7 +148,7 @@ const PeriodSlider: FC<PeriodSliderProps> = ({ periods, onChangePeriod }) => {
     const startYear = activeSlide?.querySelector('h3:first-of-type');
     const endYear = activeSlide?.querySelector('h3:last-of-type');
 
-    // period animation
+    // period change animation
     if (startYear instanceof Element && endYear instanceof Element) {
 
       gsap.from(startYear, {
@@ -166,6 +171,11 @@ const PeriodSlider: FC<PeriodSliderProps> = ({ periods, onChangePeriod }) => {
 
     onChangePeriod(activeIndex);
   };
+
+  function handleSwitchPeriod (newIndex: number) {
+    console.log('periodSlider from Switcher new index', newIndex);
+    swiperRef.current.swiper.slideTo(newIndex, 10);
+  }
   
   return (
     <StyledSwiper
@@ -194,7 +204,7 @@ const PeriodSlider: FC<PeriodSliderProps> = ({ periods, onChangePeriod }) => {
       ))}
       
       <Cirle>
-        <PeriodCirleSwicth periods={periods}/>
+        <PeriodCirleSwicth periods={periods} activeIndex={activeIndex} onSwitchPeriod={handleSwitchPeriod}/>
       </Cirle>
       <NavPanel>
         <span className='period-swiper-fraction'></span>

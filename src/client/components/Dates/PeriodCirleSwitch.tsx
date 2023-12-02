@@ -18,11 +18,15 @@ const PeriodWheel = styled.div`
     font-size: 0;
 
     transition-property: background, text-align, font-size, font-weight, line-height;
-    transition-duration: 1s;
+    transition-duration: 0.3s;
     transition-timing-function: linear;
     transition-delay: 0;
 
     &:hover {
+      cursor: pointer;
+    }
+
+    &:hover:not(.active) {
       width: 56px;
       background: none ${props => props.theme.colors.lightGrey};
       border: 1px solid rgba(48, 62, 88, 0.5);
@@ -34,19 +38,26 @@ const PeriodWheel = styled.div`
 
     span {
       position: absolute;
-      left: 20px;
+      top: 13px;
+      left: 76px;
       display: none;
       font-size: 20px;
       font-weight: 700;
       line-height: 150%;
     }
-  }
 
-  .item.active {
-      background-color: blue;
+    &.active {
+      width: 56px;
+      background: none ${props => props.theme.colors.lightGrey};
+      border: 1px solid rgba(48, 62, 88, 0.5);
+      text-align: center;
+      font-size: 20px;
+      font-weight: 400;
+      line-height: 56px;
 
-    span {
-      display: block;
+      span {
+        display: block;
+      }
     }
   }
 
@@ -69,24 +80,32 @@ const PeriodWheel = styled.div`
   }
 `;
 
-const PeriodCirleSwicth: FC<{ periods: Period[]; }> = ({periods}) => {
+type PeriodCirleSwicthProps = {
+  periods: Period[];
+  activeIndex: number;
+  onSwitchPeriod: (activeIndex: number) => void;
+}
+
+const PeriodCirleSwicth: FC<PeriodCirleSwicthProps> = ({ periods, activeIndex, onSwitchPeriod }) => {
 
   const [itemsEls, setItemsEls] = useState<HTMLElement[]>([]);
   const svgRef = useRef<SVGSVGElement>(null);
   
   gsap.registerPlugin(MotionPathPlugin);
 
-  let tracker: { item: number } = { item: 0 };
+  const trackerRef = useRef<{ item: number }>({ item: 0 });
+  const snapRef = useRef<(value: number) => number>();
+  const wrapProgressRef = useRef<(value: number) => number>();
+
   let numItems: number;
   let itemStep: number;
   let tl: gsap.core.Timeline;
   let wrapTracker: (value: number) => number;
-  let wrapProgress: (value: number) => number;
-  let snap: (value: number) => number;
+
+  tl = gsap.timeline({ paused: true, reversed: true });
+
 
   useLayoutEffect(() => {
-    console.log('useEffect');
-    console.log('switch get', periods);
 
     const circlePath = MotionPathPlugin.convertToPath("#holder", false)[0];
     circlePath.id = "circlePath";
@@ -98,8 +117,8 @@ const PeriodCirleSwicth: FC<{ periods: Period[]; }> = ({periods}) => {
 
     numItems = items.length;
     itemStep = 1 / numItems;
-    wrapProgress = gsap.utils.wrap(0, 1);
-    snap = gsap.utils.snap(itemStep);
+    wrapProgressRef.current = gsap.utils.wrap(0, 1);
+    snapRef.current = gsap.utils.snap(itemStep);
     wrapTracker = gsap.utils.wrap(0, numItems);
     
     if (items.length > 0) {
@@ -116,8 +135,6 @@ const PeriodCirleSwicth: FC<{ periods: Period[]; }> = ({periods}) => {
       });
     }
     
-    tl = gsap.timeline({ paused: true, reversed: true });
-
     tl.to('.wrapper', {
       rotation: 360, 
       transformOrigin: 'center', 
@@ -132,7 +149,7 @@ const PeriodCirleSwicth: FC<{ periods: Period[]; }> = ({periods}) => {
       ease: 'none',
     }, 0);
 
-    tl.to(tracker, {
+    tl.to(trackerRef, {
       item: numItems,
       duration: 1, 
       ease: 'none',
@@ -142,55 +159,60 @@ const PeriodCirleSwicth: FC<{ periods: Period[]; }> = ({periods}) => {
     }, 0);
   }, [periods]);
 
-  const handleClick = (id: number) => {
-    console.log('tracker', tracker);
-    const current = tracker.item;
-    const activeItem = id;
+  const handleClick = (i: number) => {
+    console.log('handleClick');
+    console.log('tracker', trackerRef.current.item);
+    const current = trackerRef.current.item;
+    const activeItem = i;
 
-    if (id === current) {
+    if (i === current) {
       return;
     }
 
     // set active item to the item that was clicked and remove active class from all items
     const newItems: HTMLElement[] = [...itemsEls];
+    console.log('prev index', current);
+    console.log('new index', i);
+
     newItems[current].classList.remove('active');
-    console.log('new active item', newItems);
     newItems[activeItem].classList.add('active');
     setItemsEls(newItems);
+    trackerRef.current.item = activeItem;
+    console.log('new tracker', trackerRef.current.item);
 
-    const diff = current - id;
+    const diff = current - i;
 
     if (Math.abs(diff) < numItems / 2) {
       moveWheel(diff * itemStep);
     } else {
       const amt = numItems - Math.abs(diff);
 
-      if (current > id) {
+      if (current > i) {
         moveWheel(amt * -itemStep);
       } else {
         moveWheel(amt * itemStep);
       }
     }
+
+    onSwitchPeriod(activeItem);
   };
 
   const moveWheel = (amount: number) => {
-    console.log('moveWheel', tl);
     const progress = tl.progress();
-    tl.progress(wrapProgress(snap(tl.progress() + amount)));
-    const next = tracker.item;
-    tl.progress(progress);
+    const snapFn = snapRef.current;
+    const wrapProgressFn = wrapProgressRef.current;
 
-    const newItems = [...itemsEls];
-    newItems[next].classList.remove('active');
-    newItems[next].classList.add('active');
-    setItemsEls(newItems);
+    if (snapFn && wrapProgressFn) {
+      tl.progress(wrapProgressFn(snapFn(tl.progress() + amount)));
+      tl.progress(progress);
 
-    gsap.to(tl, {
-      progress: snap(tl.progress() + amount),
-      modifiers: {
-        progress: wrapProgress
-      }
-    });
+      gsap.to(tl, {
+        progress: snapFn(tl.progress() + amount),
+        modifiers: {
+          progress: wrapProgressFn
+        }
+      });
+    }
   };
 
   return(
@@ -199,7 +221,7 @@ const PeriodCirleSwicth: FC<{ periods: Period[]; }> = ({periods}) => {
         {(periods.length > 0) && periods.map(period => (
           <div
             key={period.id}
-            className={`item ${period.id} ${period.id ===1? 'active' : ''}`}
+            className={`item ${period.id} ${(period.id - 1) === activeIndex? 'active' : ''}`}
             onClick={() => handleClick(periods.indexOf(period))}
           >
             {period.id}
