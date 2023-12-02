@@ -6,7 +6,7 @@ import { Period } from '../../types/Period';
 import dot from '../../assets/icons/icon-dot.svg'
 
 const PeriodWheel = styled.div`
-  max-width: 500px;
+  width: clamp(350px, 19.732rem + 14.88vw, 530px);
 
   .item {
     position: relative;
@@ -62,15 +62,23 @@ const PeriodWheel = styled.div`
   }
 
   svg {
-      height: 530px;
-      aspect-ratio: 1;
-      opacity: 0.2;
-      overflow: visible;
-      z-index: -1;
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%,-50%);
+    width: 350px;
+    aspect-ratio: 1;
+    opacity: 0.2;
+    overflow: visible;
+    z-index: -1;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+    
+    @media ${props => props.theme.media.desktop} {
+      width: 410px;
+    }
+
+    @media ${props => props.theme.media.largeScreens} {
+      width: 530px;
+    }
   }
 
   .st0 { fill: none;
@@ -113,7 +121,6 @@ const PeriodCirleSwicth: FC<PeriodCirleSwicthProps> = ({ periods, activeIndex, o
 
     const items = gsap.utils.toArray('.item') as HTMLElement[];
     setItemsEls(items);
-    console.log('items set', items);
 
     numItems = items.length;
     itemStep = 1 / numItems;
@@ -128,7 +135,7 @@ const PeriodCirleSwicth: FC<PeriodCirleSwicthProps> = ({ periods, activeIndex, o
             path: circlePath,
             align: circlePath,
             alignOrigin: [0.5, 0.5],
-            end: i / items.length,
+            end: gsap.utils.wrap(0, 1, i / items.length - 0.15),
           },
           scale: 0.9,
         });
@@ -160,8 +167,6 @@ const PeriodCirleSwicth: FC<PeriodCirleSwicthProps> = ({ periods, activeIndex, o
   }, [periods]);
 
   const handleClick = (i: number) => {
-    console.log('handleClick');
-    console.log('tracker', trackerRef.current.item);
     const current = trackerRef.current.item;
     const activeItem = i;
 
@@ -171,14 +176,11 @@ const PeriodCirleSwicth: FC<PeriodCirleSwicthProps> = ({ periods, activeIndex, o
 
     // set active item to the item that was clicked and remove active class from all items
     const newItems: HTMLElement[] = [...itemsEls];
-    console.log('prev index', current);
-    console.log('new index', i);
 
     newItems[current].classList.remove('active');
     newItems[activeItem].classList.add('active');
     setItemsEls(newItems);
     trackerRef.current.item = activeItem;
-    console.log('new tracker', trackerRef.current.item);
 
     const diff = current - i;
 

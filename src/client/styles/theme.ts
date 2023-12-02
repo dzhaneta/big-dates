@@ -13,6 +13,7 @@ export const baseTheme = {
   media: {
     tablet: "(min-width: 480px)",
     laptop: "(min-width: 768px)",
-    desktop: "(min-width: 1024px)"
+    desktop: "(min-width: 1024px)",
+    largeScreens: "(min-width: 1440px)"
   }
 };
