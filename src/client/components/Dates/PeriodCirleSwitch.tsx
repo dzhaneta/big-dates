@@ -6,7 +6,24 @@ import { Period } from '../../types/Period';
 import dot from '../../assets/icons/icon-dot.svg'
 
 const PeriodWheel = styled.div`
-  width: clamp(350px, 19.732rem + 14.88vw, 530px);
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .wrapper {
+    width: 350px;
+    aspect-ratio: 1;
+    
+    @media ${props => props.theme.media.desktop} {
+      width: 410px;
+    }
+
+    @media ${props => props.theme.media.largeScreens} {
+      width: 530px;
+    }
+  }
 
   .item {
     position: relative;
