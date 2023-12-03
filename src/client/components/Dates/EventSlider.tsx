@@ -74,6 +74,10 @@ const EventsNavButton = styled.button`
     box-shadow: 0px 0px 15px ${props => props.theme.colors.shadow};
     display: none;
     z-index: 1;
+
+    &:hover {
+      cursor: pointer;
+    }
     
     &:disabled {
       display: none;
